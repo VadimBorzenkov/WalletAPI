@@ -8,8 +8,7 @@ import (
 	"github.com/VadimBorzenkov/WalletAPI/config"
 )
 
-var DB *sql.DB
-
+// Init инициализирует подключение к базе данных на основе конфигурации и возвращает объект базы данных.
 func Init(cfg *config.Config) *sql.DB {
 	url := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", cfg.DBHost, cfg.DBPort, cfg.DBUser, cfg.DBPass, cfg.DBName)
 
@@ -22,6 +21,7 @@ func Init(cfg *config.Config) *sql.DB {
 	return db
 }
 
+// Close закрывает соединение с базой данных и возвращает ошибку, если возникла проблема при закрытии.
 func Close(db *sql.DB) error {
 	if err := db.Close(); err != nil {
 		return err

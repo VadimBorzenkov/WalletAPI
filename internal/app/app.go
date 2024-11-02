@@ -12,37 +12,49 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Run инициализирует и запускает сервер приложения
 func Run() {
+	// Инициализация логгера для логирования событий приложения
 	logger := logger.InitLogger()
 
+	// Загрузка конфигурации из файла config
 	config, err := config.LoadConfig()
 	if err != nil {
-		logger.Fatalf("Failed to load config: %v", err)
+		logger.Fatalf("Ошибка загрузки конфигурации: %v", err)
 	}
 
+	// Инициализация подключения к базе данных
 	dbase := db.Init(config)
 	defer func() {
+		// Закрытие подключения к базе данных при завершении работы приложения
 		if err := db.Close(dbase); err != nil {
-			logger.Errorf("Failed to close database: %v", err)
+			logger.Errorf("Ошибка закрытия базы данных: %v", err)
 		}
 	}()
 
+	// Выполнение миграций базы данных для настройки необходимых таблиц
 	if err := migrator.RunDatabaseMigrations(dbase); err != nil {
-		logger.Fatalf("Failed to run migrations: %v", err)
+		logger.Fatalf("Ошибка выполнения миграций: %v", err)
 	}
 
+	// Создание нового репозитория для работы с базой данных
 	repo := repository.NewApiWalletRepository(dbase, logger)
 
+	// Инициализация сервисного уровня с репозиторием и логгером
 	svc := service.NewApiWalletService(repo, logger)
 
+	// Настройка обработчиков API для обработки запросов
 	handler := handler.NewApiWalletHandler(svc, logger)
 
+	// Инициализация приложения Fiber для маршрутизации
 	app := fiber.New()
 
+	// Регистрация маршрутов API в приложении
 	routes.SetupRoutes(app, handler)
 
-	logger.Infof("Starting server on port %s", config.Port)
+	// Запуск сервера на указанном порту из конфигурации
+	logger.Infof("Запуск сервера на порту %s", config.Port)
 	if err := app.Listen(config.Port); err != nil {
-		logger.Fatalf("Error starting server: %v", err)
+		logger.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }

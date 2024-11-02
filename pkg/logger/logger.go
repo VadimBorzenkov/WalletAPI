@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// Создание логгера для настройки уровней логирования на основе переменных окружения
 func InitLogger() *logrus.Logger {
 	logger := logrus.New()
 

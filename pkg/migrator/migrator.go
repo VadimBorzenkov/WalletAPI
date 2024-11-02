@@ -8,6 +8,7 @@ import (
 	_ "github.com/golang-migrate/migrate/source/file"
 )
 
+// Запуск миграций базы данных
 func RunDatabaseMigrations(db *sql.DB) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
